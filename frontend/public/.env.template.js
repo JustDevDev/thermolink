@@ -1,0 +1,5 @@
+window.__APP_ENV__ = {
+  VITE_API_URL: "${VITE_API_URL}",
+  VITE_WS_URL: "${VITE_WS_URL}",
+  VITE_GOOGLE_AUTH_URL: "${VITE_GOOGLE_AUTH_URL}",
+};

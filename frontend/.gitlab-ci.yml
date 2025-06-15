@@ -1,0 +1,173 @@
+# ------------------------------------
+# Global runner settings
+# ------------------------------------
+image: node:18-alpine
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_IMAGE: $DOCKER_USERNAME/$APP_NAME
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - ~/.npm
+    - node_modules/
+
+stages:
+  - setup
+  - quality
+  - build
+  - deploy
+
+# ------------------------------------
+# 1) Dependency installation
+# ------------------------------------
+install:
+  stage: setup
+  script:
+    - apk add --no-cache git
+    - rm -rf node_modules/.cache
+    - rm -rf .npm
+    - npm cache clean --force
+    - npm ci
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+# ------------------------------------
+# 2) Type checking, linting, environment validation, bundle size
+# ------------------------------------
+type-check:
+  stage: quality
+  script:
+    - npm run type-check
+  dependencies:
+    - install
+
+lint:
+  stage: quality
+  script:
+    - npm run lint
+  dependencies:
+    - install
+
+env-check:
+  stage: quality
+  script:
+    - |
+      if [ ! -f .env.example ]; then
+        echo "Error: .env.example file is missing"
+        exit 1
+      fi
+    - |
+      while IFS= read -r line || [ -n "$line" ]; do
+        [[ -z "$line" || "$line" =~ ^# ]] && continue
+        var_name=$(echo "$line" | cut -d'=' -f1)
+        if [ -n "$var_name" ]; then
+          eval val=\${$var_name}
+          if [ -z "$val" ]; then
+            echo "Warning: Environment variable $var_name is not set"
+          fi
+        fi
+      done < .env.example
+  dependencies: []
+
+bundle-size:
+  stage: quality
+  script:
+    - npm run build
+    - |
+      MAX_SIZE_MB=10
+      BUNDLE_SIZE_MB=$(du -sm dist | cut -f1)
+      if [ $BUNDLE_SIZE_MB -gt $MAX_SIZE_MB ]; then
+        echo "Error: Bundle size ($BUNDLE_SIZE_MB MB) exceeds maximum allowed size ($MAX_SIZE_MB MB)"
+        exit 1
+      fi
+  dependencies:
+    - install
+
+# ------------------------------------
+# 3) Build for all environments
+# ------------------------------------
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  dependencies:
+    - install
+
+build-staging:
+  stage: build
+  script:
+    - echo "VITE_API_URL=$STAGING_VITE_API_URL" >> .env
+    - echo "VITE_WS_URL=$STAGING_VITE_WEBSOCKET_URL" >> .env
+    - echo "VITE_GOOGLE_AUTH_URL=$STAGING_GOOGLE_AUTH_URL" >> .env
+    - echo "VITE_API_KEY=$STAGING_VITE_API_KEY" >> .env
+    - npm run build
+  only:
+    - develop
+
+build-production:
+  stage: build
+  script:
+    - echo "VITE_API_URL=$VITE_API_URL" >> .env
+    - echo "VITE_WS_URL=$VITE_WS_URL" >> .env
+    - echo "VITE_GOOGLE_AUTH_URL=$GOOGLE_AUTH_URL" >> .env
+    - echo "VITE_API_KEY=$VITE_API_KEY" >> .env
+    - echo "VITE_APP_NAME=$VITE_APP_NAME" >> .env
+    - npm run build
+  only:
+    - main
+
+# ------------------------------------
+# 4) Push to Docker Hub
+# ------------------------------------
+deploy-to-dockerhub:
+  stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:dind
+  variables:
+    SHORT_SHA: $CI_COMMIT_SHORT_SHA
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - docker build -t "$DOCKER_IMAGE:$SHORT_SHA" .
+    - docker push "$DOCKER_IMAGE:$SHORT_SHA"
+  only:
+    - main
+
+# ------------------------------------
+# 5) Update deployment.yaml and commit
+# ------------------------------------
+update-k8s-manifest:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git
+    - echo -e "machine gitlab.com\nlogin ${GITLAB_USER}\npassword ${GITLAB_TOKEN}" > ~/.netrc
+    - chmod 600 ~/.netrc
+  script: |
+    git clone "https://gitlab.com/${DEPLOY_REPO_PATH}.git" deploy-repo
+    cd deploy-repo
+
+    git config --global user.email "admin@just-dev.dev"
+    git config --global user.name  "Just Dev"
+
+    sed -i "s|image: .*|image: \"${DOCKER_IMAGE}:${CI_COMMIT_SHORT_SHA}\"|" ops/frontend/deployment.yaml
+
+    git add ops/frontend/deployment.yaml
+    git commit -m "ci: update image tag to ${CI_COMMIT_SHORT_SHA}" || echo "No changes to commit"
+    git push origin HEAD:main
+  only:
+    - main
+  needs:
+    - deploy-to-dockerhub
