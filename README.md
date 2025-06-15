@@ -1,6 +1,6 @@
 <div style="display: flex; align-items: center; gap: 1rem">
   <img src="frontend/public/logo.svg" alt="ThermoLink Logo" width="80" />
-  <h1>ThermoLink</h1>
+  <div style="font-size: 2em; font-weight: bold;">ThermoLink</div>
 </div>
 
 # About ThermoLink
