@@ -5,8 +5,12 @@ ThermoLink is a demonstration web application for real-time temperature monitori
 The repository is divided into two main parts:
 
 - **Frontend**: A React-based web interface
-- **Backend**: API services and data processing
+- **Backend**: A Spring based API services and core data processing
 
 # Frontend
 
 A modern React application built with TypeScript, featuring a responsive design, internationalization, and Material-UI components.
+
+# Backend
+
+Modulithic Spring application ready for scalability. Covered with tests. Using REST and WEBSOCKET interface. PostgresDB as data layer.
