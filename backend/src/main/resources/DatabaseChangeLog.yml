@@ -1,0 +1,8 @@
+# src/main/resources/db/changelog/db.changelog-master.yaml
+databaseChangeLog:
+  - include:
+      file: DatabaseTablesInit.yml
+      relativeToChangelogFile: false
+  - include:
+      file: DatabaseDataInit.yml
+      relativeToChangelogFile: false

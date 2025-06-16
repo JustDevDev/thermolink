@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: data-1
+      author: PSkoda
+      changes:
+        - insert:
+            schemaName: pilot
+            tableName: email_template
+            columns:
+              - column:
+                  name: template_name
+                  value: "verifyUserEmail"
+              - column:
+                  name: subject
+                  value: "Verification URL"
+              - column:
+                  name: body
+                  value: |
+                    Dear User!
+                    Welcome to our application and thank you for registering.
+                    To finish registration please use the following link:
+
+                    %s/%s
+
+                    Kind regards,
+                    Your Skomi team.
+        - insert:
+            schemaName: pilot
+            tableName: email_template
+            columns:
+              - column:
+                  name: template_name
+                  value: "resetPasswordEmail"
+              - column:
+                  name: subject
+                  value: "Reset your password."
+              - column:
+                  name: body
+                  value: |
+                    Dear user,
+                    link for resetting Your password is:
+                    %s

@@ -1,0 +1,462 @@
+databaseChangeLog:
+  # Create pilot.user table
+  - changeSet:
+      id: 1
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: app_user
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "gen_random_uuid()"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: avatar
+                  type: varchar(255)
+              - column:
+                  name: "password"
+                  type: varchar(255)
+              - column:
+                  name: user_avatar
+                  type: varchar
+              - column:
+                  name: user_email
+                  type: varchar(255)
+              - column:
+                  name: user_first_name
+                  type: varchar(255)
+              - column:
+                  name: user_last_name
+                  type: varchar(255)
+              - column:
+                  name: verified
+                  type: boolean
+                  defaultValueComputed: "false"
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: app_user
+            columnNames: user_email
+            constraintName: user_email_unique
+
+  # Create pilot.sensor table
+  - changeSet:
+      id: 2
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: sensor
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: place_id
+                  type: varchar(64)
+              - column:
+                  name: name
+                  type: varchar(64)
+  # Create pilot.plc table
+  - changeSet:
+      id: 3
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: plc
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: "name"
+                  type: varchar(255)
+
+  # Create pilot.place_history table
+  - changeSet:
+      id: 4
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: place_history
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: "condition"
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: timestamptz(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: temperature
+                  type: float8
+              - column:
+                  name: updated_at
+                  type: timestamptz(6)
+              - column:
+                  name: place_id
+                  type: varchar
+
+  # Create pilot.sensor_plc table
+  - changeSet:
+      id: 44
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: sensor_plc
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: port
+                  type: int4
+              - column:
+                  name: plc_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sensor_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+
+  # Create pilot.user_plc table (composite primary key)
+  - changeSet:
+      id: 5
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: user_plc
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  constraints:
+                    nullable: false
+                    uniqueKey: true
+              - column:
+                  name: plc_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_plc
+            columnNames: plc_id, user_id
+            constraintName: user_plc_pkey
+
+  # Create pilot.user_sensor table (composite primary key)
+  - changeSet:
+      id: 6
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: user_sensor
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  constraints:
+                    nullable: false
+                    uniqueKey: true
+              - column:
+                  name: sensor_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_sensor
+            columnNames: sensor_id, user_id
+            constraintName: user_sensor_pkey
+
+  - changeSet:
+      id: 7
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: place
+            columns:
+              - column:
+                  name: id
+                  type: varchar
+                  remarks: "Name of the place (for example Prague)"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: continent
+                  type: varchar(24)
+              - column:
+                  name: average_temperature
+                  type: float8
+              - column:
+                  name: "condition"
+                  type: varchar(64)
+              - column:
+                  name: temperature
+                  type: float8
+
+  # Add foreign key to place_history (sensor_id references sensor(id))
+  - changeSet:
+      id: 8
+      author: PSkoda
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: place_history
+            baseColumnNames: place_id
+            referencedTableName: place
+            referencedColumnNames: id
+            constraintName: fk_place_history_place
+
+  # Add foreign keys for sensor_plc table
+  - changeSet:
+      id: 9
+      author: PSkoda
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: sensor_plc
+            baseColumnNames: user_id
+            referencedTableName: app_user
+            referencedColumnNames: id
+            constraintName: fk19iot56g2wilsstghektroobo
+        - addForeignKeyConstraint:
+            baseTableName: sensor_plc
+            baseColumnNames: sensor_id
+            referencedTableName: sensor
+            referencedColumnNames: id
+            constraintName: fk8exled0dxtqwjv1vvvcs3dwtw
+        - addForeignKeyConstraint:
+            baseTableName: sensor_plc
+            baseColumnNames: plc_id
+            referencedTableName: plc
+            referencedColumnNames: id
+            constraintName: fkqhy2ah3irxcw99ti41e6mwirl
+
+  # Add foreign keys for user_plc table
+  - changeSet:
+      id: 10
+      author: PSkoda
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: user_plc
+            baseColumnNames: plc_id
+            referencedTableName: plc
+            referencedColumnNames: id
+            constraintName: fkh3er5l821q17r7j1hcbvwq8c6
+        - addForeignKeyConstraint:
+            baseTableName: user_plc
+            baseColumnNames: user_id
+            referencedTableName: app_user
+            referencedColumnNames: id
+            constraintName: fky4m31cmkqfwpsxdi3m3v1su4
+
+  # Add foreign keys for user_sensor table
+  - changeSet:
+      id: 11
+      author: PSkoda
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: user_sensor
+            baseColumnNames: user_id
+            referencedTableName: app_user
+            referencedColumnNames: id
+            constraintName: fk9ynt3bllqo8ihwb945ys7m5e1
+        - addForeignKeyConstraint:
+            baseTableName: user_sensor
+            baseColumnNames: sensor_id
+            referencedTableName: sensor
+            referencedColumnNames: id
+            constraintName: fks3u1tc21gp2f6vixmb10vb1y7
+
+  # Create pilot.invalidated_tokens table
+  - changeSet:
+      id: 12
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: invalidated_token
+            columns:
+              - column:
+                  name: token_hash
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: timestamptz(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: invalidated_at
+                  type: timestamptz(6)
+                  constraints:
+                    nullable: false
+
+  # Create pilot.diagram_source table
+  - changeSet:
+      id: 13
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: diagram_source
+            columns:
+              - column:
+                  name: user_email
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: diagram
+                  type: text
+  - changeSet:
+      id: 14
+      author: PSkoda
+      changes:
+        - addUniqueConstraint:
+            tableName: sensor_plc
+            columnNames: port, plc_id
+            constraintName: sensor_plc_unique
+  - changeSet:
+      id: 15
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: register_verification_token
+            columns:
+              - column:
+                  name: token
+                  type: varchar(255)
+                  remarks: "Generated registration verification token."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created
+                  type: timestamptz(6)
+                  remarks: "When verification is created."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  remarks: "Id of the user."
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: register_verification_token
+            baseColumnNames: user_id
+            referencedTableName: app_user
+            referencedColumnNames: id
+            constraintName: fk_register_token_user
+  - changeSet:
+      id: 16
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: email_template
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: "gen_random_uuid()"
+                  remarks: "Unique identifier for the email template."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: template_name
+                  type: varchar(255)
+                  remarks: "Unique name for the email template."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject
+                  type: varchar(255)
+                  remarks: "The email subject template."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: body
+                  type: text
+                  remarks: "The email body template containing placeholders for dynamic content."
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 17
+      author: PSkoda
+      changes:
+        - createTable:
+            tableName: reset_password_token
+            columns:
+              - column:
+                  name: token
+                  type: varchar(255)
+                  remarks: "Generated change password token."
+              - column:
+                  name: created
+                  type: timestamptz(6)
+                  remarks: "When verification is created."
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  remarks: "Id of the user."
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: reset_password_token
+            baseColumnNames: user_id
+            referencedTableName: app_user
+            referencedColumnNames: id
+            constraintName: fk_reset_password_token_user
+  - changeSet:
+      id: 18
+      author: PSkoda
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: hint_passed
+                  type: boolean
+                  defaultValueComputed: "false"
+                  remarks: "If a user went through first tutorial hints."
+                  constraints:
+                    nullable: false
