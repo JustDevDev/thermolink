@@ -74,7 +74,8 @@
     "city": "Enter city",
     "noOptions": "No options",
     "firstName": "First name",
-    "lastName": "Last name"
+    "lastName": "Last name",
+    "plcName": "PLC name"
   },
   "label": {
     "darkTheme": "Dark theme",
@@ -192,7 +193,7 @@
     "noData": "No data found"
   },
   "dashboard": {
-    "measuredValueInfo": "Measured values for the last 10 hours",
+    "measuredValueInfo": "Last 10 measured values",
     "plc": "PLC",
     "temperatureChartTitle": "Temperature Visualization from PLC Inputs",
     "geographicalMeasurements": "Geographical distribution of measurements",

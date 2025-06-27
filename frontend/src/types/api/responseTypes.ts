@@ -118,12 +118,10 @@ export type ResponseDashboardPLCConnectedSensorsTypes = {
   id: string;
   port: number;
   place: string;
-  temperatures: [
-    {
-      date: Date;
-      temperature: number;
-    }
-  ];
+  temperatures: {
+    date: Date;
+    temperature: number;
+  }[];
 };
 
 export type ResponseDashboardContinentTypes = {

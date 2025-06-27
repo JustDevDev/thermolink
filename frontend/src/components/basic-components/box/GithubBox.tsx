@@ -28,7 +28,7 @@ const GithubBox = observer(() => {
       <Label intld="text.githubBoxText" />
       <Button
         startIcon={<GitHubIcon />}
-        onClick={() => window.open("")}
+        onClick={() => window.open("https://github.com/JustDevDev/thermolink")}
         intld="button.viewOnGithub"
         sx={{ padding: "0.1rem 1.4rem" }}
       />

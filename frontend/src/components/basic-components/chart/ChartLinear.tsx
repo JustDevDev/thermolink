@@ -7,21 +7,6 @@ import { useAppTranslation } from "@/utils/translate/translate";
 import ChartLoading from "@/components/basic-components/loading/ChartLoading";
 import { Box } from "@mui/material";
 
-function getDaysInMonth(month: number, year: number) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("en-US", {
-    month: "short",
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
 export type ChartLinearSeriesModel = {
   id: string;
   label: string;
@@ -51,10 +36,7 @@ export type ChartLinearProps = {
 
 const ChartLinear = observer((props: ChartLinearProps) => {
   const { series, xAxisData, hiddenLegend = false, loading = false } = props;
-  const data =
-    xAxisData && xAxisData.length > 0
-      ? xAxisData
-      : getDaysInMonth(new Date().getMonth() + 1, new Date().getFullYear());
+  const data = xAxisData && xAxisData.length > 0 ? xAxisData : [];
 
   const userStore = useUserStore();
   const { t } = useAppTranslation();

@@ -93,7 +93,7 @@ const DiagramCanvas = observer(() => {
               editMode: store.editMode,
             }
           : {
-              name: "diagram.plc",
+              name: "PLC",
               editMode: store.editMode,
             },
     });

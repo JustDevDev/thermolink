@@ -74,7 +74,8 @@
     "city": "Zadejte město",
     "noOptions": "Žádné možnosti",
     "firstName": "John",
-    "lastName": "Doe"
+    "lastName": "Doe",
+    "plcName": "Název PLC"
   },
   "label": {
     "darkTheme": "Tmavý režim",
@@ -192,7 +193,7 @@
     "noData": "Nebyly nalezeny žádné záznamy"
   },
   "dashboard": {
-    "measuredValueInfo": "Naměřené hodnoty za posledních 10 hodin",
+    "measuredValueInfo": "Posledních 10 naměřených hodnot",
     "plc": "PLC",
     "temperatureChartTitle": "Vizualizace teplot z PLC vstupů",
     "geographicalMeasurements": "Geografické rozložení měření",

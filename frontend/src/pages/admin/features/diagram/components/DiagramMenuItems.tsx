@@ -56,7 +56,7 @@ const DiagramMenuItems = ({
           type: "plcNode",
           position: centerPos,
           data: {
-            name: "diagram.plc",
+            name: "PLC",
             city: {
               id: "",
               city: "",

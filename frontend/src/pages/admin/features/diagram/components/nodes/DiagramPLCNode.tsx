@@ -9,6 +9,9 @@ import DiagramNodeHeader from "./DiagramNodeHeader";
 import DiagramPLCNodeHandle from "./DiagramPLCNodeHandle";
 import DiagramPLCNodeStore from "../../stores/DiagramPLCNodeStore";
 import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
+import TextField from "@/components/basic-components/field/TextField";
+import Paragraph from "@/components/basic-components/typography/Paragraph";
+import { Edit } from "@mui/icons-material";
 
 export type DiagramPLCNodeData = {
   name: string;
@@ -58,8 +61,8 @@ const DiagramPLCNode = observer(
             selected ? gray[400] : isLight ? gray[100] : gray[700]
           }`,
           borderRadius: 1,
-          minWidth: 130,
-          minHeight: 190,
+          minWidth: 220,
+          minHeight: 230,
           transition: "border-color 0.2s ease",
         }}
       >
@@ -80,9 +83,39 @@ const DiagramPLCNode = observer(
             <NetworkCheckIcon
               sx={{ fontSize: "18px", color: gray[900], mr: 1 }}
             />
-            <Label intld={data.name} sx={{ color: gray[900] }} />
+            <Label intld={"diagram.plc"} sx={{ color: gray[900] }} />
           </Box>
         </DiagramNodeHeader>
+        <Box
+          sx={{
+            padding: "1rem 0.5rem 0 0.5rem",
+            display: "flex",
+            alignItems: "center",
+            minHeight: 40,
+          }}
+        >
+          {data.editMode ? (
+            <TextField
+              value={data.name}
+              onChange={(value) => {
+                data.name = value;
+              }}
+              label="placeHolder.plcName"
+            />
+          ) : (
+            <Box
+              sx={{
+                paddingBottom: "0.8rem",
+                display: "flex",
+                gap: 1,
+                alignItems: "center",
+              }}
+            >
+              <Edit sx={{ fontSize: "18px", color: gray[500] }} />
+              <Paragraph>{data.name}</Paragraph>
+            </Box>
+          )}
+        </Box>
 
         <Box
           sx={{
